@@ -1,113 +1,200 @@
-import Image from "next/image";
+'use client';
+import { distances } from '@/data/distances';
+import { useMemo, useState } from 'react';
 
 export default function Home() {
+  const [minutes, setMinutes] = useState<string>('6');
+  const [seconds, setSeconds] = useState<string>('0');
+
+  const speed = useMemo(() => {
+    const min = minutes ? parseInt(minutes) : 6;
+    const sec = seconds ? parseInt(seconds) : 0;
+    return String((3600 / (sec + min * 60)).toFixed(2));
+  }, [minutes, seconds]);
+
+  const calculatedDistances = useMemo(() => {
+    const min = minutes ? parseInt(minutes) : 6;
+    const sec = seconds ? parseInt(seconds) : 0;
+    const totalSec = sec + min * 60;
+    return distances.map((object) => {
+      return totalSec * (object.distance / 1000);
+    });
+  }, [minutes, seconds]);
+
+  const format = (toParse: number) => {
+    return `${String(Math.floor(toParse / 3600)).padStart(2, '0')}:${String(Math.floor((toParse % 3600) / 60)).padStart(
+      2,
+      '0'
+    )}:${String((toParse % 60).toFixed(0)).padStart(2, '0')}`;
+  };
+
+  const handleChangeMinutes = (event: React.FormEvent<HTMLInputElement>) => {
+    if (event.currentTarget.value === '') {
+      setMinutes('');
+      return;
+    }
+    const val = parseInt(event.currentTarget.value);
+    if (val < 60 && val > -1) {
+      setMinutes(event.currentTarget.value);
+    }
+  };
+
+  const handleChangeSeconds = (event: React.FormEvent<HTMLInputElement>) => {
+    if (event.currentTarget.value === '') {
+      setSeconds('');
+      return;
+    }
+    const val = parseInt(event.currentTarget.value);
+    if (val < 60 && val > -1) {
+      setSeconds(event.currentTarget.value);
+    }
+  };
+
+  const increment = (isMinutes: boolean) => {
+    if (isMinutes) {
+      if (parseInt(minutes) + 1 < 60) {
+        setMinutes((parseInt(minutes) + 1).toString());
+      }
+    } else {
+      if (parseInt(seconds) + 1 < 60) {
+        setSeconds((parseInt(seconds) + 1).toString());
+      }
+    }
+  };
+
+  const decrement = (isMinutes: boolean) => {
+    if (isMinutes) {
+      if (parseInt(minutes) - 1 > -1) {
+        setMinutes((parseInt(minutes) - 1).toString());
+      }
+    } else {
+      if (parseInt(seconds) - 1 > -1) {
+        setSeconds((parseInt(seconds) - 1).toString());
+      }
+    }
+  };
+
+  const reset = () => {
+    setMinutes('6');
+    setSeconds('0');
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className='flex flex-col justify-start h-full items-center'>
+      <h1 className='text-5xl py-6'>Pace (min/km) to Speed (km/h)</h1>
+      <div className='text-3xl flex flex-row w-full p-10 justify-around'>
+        <div className='w-1/2 flex flex-col items-center'>
+          <div className='flex flex-row p-4'>
+            <div className='px-4'>
+              <label htmlFor='minutes' className='flex justify-center text-sm font-medium leading-6 text-light-text'>
+                Minutes
+              </label>
+              <div className='flex flex-row'>
+                <input
+                  value={minutes}
+                  onChange={handleChangeMinutes}
+                  type='number'
+                  name='minutes'
+                  id='minutes'
+                  className='block w-16 rounded-md py-1.5 pl-2 text-light-text placeholder:text-gray-400 bg-second focus:outline-none'
+                  placeholder='6'
+                />
+                <div className='flex flex-col ml-2 justify-between'>
+                  <button
+                    className='w-6 h-9 bg-second rounded-md mb-1 hover:bg-main'
+                    id='incrementMinutes'
+                    onClick={() => increment(true)}
+                  >
+                    <span>+</span>
+                  </button>
+                  <button
+                    className='w-6 h-9 bg-second rounded-md mt-1 hover:bg-main'
+                    id='decrementMinutes'
+                    onClick={() => decrement(true)}
+                  >
+                    <span>-</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className='px-4'>
+              <label htmlFor='seconds' className='flex justify-center text-sm font-medium leading-6 text-light-text'>
+                Seconds
+              </label>
+              <div className='flex flex-row'>
+                <input
+                  value={seconds}
+                  onChange={handleChangeSeconds}
+                  type='number'
+                  name='seconds'
+                  id='seconds'
+                  className='block w-16 rounded-md py-1.5 pl-2 text-light-text placeholder:text-gray-400 bg-second focus:outline-none'
+                  placeholder='00'
+                />
+                <div className='flex flex-col ml-2 justify-between'>
+                  <button
+                    className='w-6 h-9 bg-second rounded-md mb-1 hover:bg-main'
+                    id='incrementSeconds'
+                    onClick={() => increment(false)}
+                  >
+                    <span>+</span>
+                  </button>
+                  <button
+                    className='w-6 h-9 bg-second rounded-md mt-1 hover:bg-main'
+                    id='decrementSeconds'
+                    onClick={() => decrement(false)}
+                  >
+                    <span>-</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className='w-1/2 flex flex-col items-center'>
+          <div className='flex flex-row mt-8'>
+            <div>
+              <label htmlFor='minutes' className='flex justify-center text-sm font-medium leading-6 text-light-text'>
+                km/h
+              </label>
+              <div className='flex flex-row w-48 justify-center'>
+                <p className='px-2 text-5xl'>{speed}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-full sm:before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full sm:after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <div className='w-full flex flex-col items-center'>
+        <div className='text-3xl flex flex-row w-full p-10 justify-center'>
+          <div>
+            {calculatedDistances.map((value, index) => {
+              if (index < 9)
+                return (
+                  <div className='flex flex-row w-80 mx-2 bg-second rounded-lg my-1' key={index}>
+                    <p className='px-2 py-1 w-48'>{distances[index].label}</p>
+                    <p className='px-2 py-1 w-36'>{format(value)}</p>
+                  </div>
+                );
+            })}
+          </div>
+          <div>
+            {calculatedDistances.map((value, index) => {
+              if (index >= 9)
+                return (
+                  <div className='flex flex-row w-80 mx-2 bg-second rounded-lg my-1' key={index}>
+                    <p className='px-2 py-1 w-48'>{distances[index].label}</p>
+                    <p className='px-2 py-1 w-36'>{format(value)}</p>
+                  </div>
+                );
+            })}
+          </div>
+        </div>
+        <div>
+          <button onClick={() => reset()} className='bg-second p-2 rounded-lg text-2xl hover:bg-main mb-2'>
+            RESET
+          </button>
+        </div>
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50 text-balance`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
