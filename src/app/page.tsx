@@ -77,14 +77,14 @@ export default function Home() {
   const reset = () => {
     setMinutes('6');
     setSeconds('0');
-  }
+  };
 
   return (
     <div className='flex flex-col justify-start h-full items-center'>
-      <h1 className='text-5xl py-6'>Pace (min/km) to Speed (km/h)</h1>
+      <h1 className='text-2xl md:text-5xl py-2 md:py-6'>Pace (min/km) to Speed (km/h)</h1>
       <div className='text-3xl flex flex-row w-full p-10 justify-around'>
         <div className='w-1/2 flex flex-col items-center'>
-          <div className='flex flex-row p-4'>
+          <div className='flex flex-col md:flex-row p-4'>
             <div className='px-4'>
               <label htmlFor='minutes' className='flex justify-center text-sm font-medium leading-6 text-light-text'>
                 Minutes
@@ -165,7 +165,7 @@ export default function Home() {
         </div>
       </div>
       <div className='w-full flex flex-col items-center'>
-        <div className='text-3xl flex flex-row w-full p-10 justify-center'>
+        <div className='text-3xl flex flex-col md:flex-row w-full p-10 justify-center'>
           <div>
             {calculatedDistances.map((value, index) => {
               if (index < 9)
